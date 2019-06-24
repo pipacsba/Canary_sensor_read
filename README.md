@@ -5,6 +5,7 @@ idea based on: https://www.joshdurbin.net/posts/2015-10-reading-sensor-data-from
 
 fill the conf, rename the conf, and use it
 
+```
 Home assistant example config:
   - platform: command_line
     name: canary_temperature
@@ -29,3 +30,4 @@ Home assistant example config:
         friendly_name: "Canary Humidity"
         value_template: "{{ (state_attr('sensor.canary_temperature', 'humidity')) | round(0) }}"
         unit_of_measurement: "%"
+```
