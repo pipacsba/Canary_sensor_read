@@ -95,7 +95,7 @@ class Canary:
                     # print(self.session)
         return response.json()
     
-    # "method": "GET", "url": "https://my.canary.is/api/readings?deviceId=1174173&type=canary"
+    # "method": "GET", "url": "https://my.canary.is/api/readings?deviceId=1234567&type=canary"
     def getMeasurements(self, deviceId=None, devicetype=None):
         command= "readings"
         headers={}
