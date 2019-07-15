@@ -35,14 +35,17 @@ class Canary:
             response=requests.get("https://my.canary.is/login", headers=headers)
             response.raise_for_status()
             #a_resp=json.loads(response.headers)
-            s=response.headers["set-cookie"].split(';')
+            s=response.headers["set-cookie"].split(',')
+            # print(s)
             for astring in s:
-                if "XSRF-TOKEN" in astring:
-                    self.xsrf_token=astring.split('=')[1]
-                if "ssesyranac" in astring:
-                    self.session=astring.split('=')[1]
-            #print(self.xsrf_token)
-            #print(self.session)
+                s2=astring.split(';')
+                for bstring in s2:
+                    if "XSRF-TOKEN" in bstring:
+                        self.xsrf_token=bstring.split('=')[1]
+                        # print(self.xsrf_token)
+                    if "ssesyranac" in bstring:
+                        self.session=bstring.split('=')[1]
+                        # print(self.session)
             
             # with header information available log in
             if len(self.session)>10:
@@ -51,13 +54,16 @@ class Canary:
                 headers["Cookie"]= "ssesyranac=" + self.session
                 response = requests.post("https://my.canary.is/api/auth/login", data=payload, headers=headers)
                 response.raise_for_status()
-                s=response.headers["set-cookie"].split(';')
+                s=response.headers["set-cookie"].split(',')
                 for astring in s:
-                    if "XSRF-TOKEN" in astring:
-                        self.xsrf_token=astring.split('=')[1]
-                        #print("xsrf_token updated")
-                    if "ssesyranac" in astring:
-                        self.session=astring.split('=')[1]
+                    s2=astring.split(';')
+                    for bstring in s2:
+                        if "XSRF-TOKEN" in bstring:
+                            self.xsrf_token=bstring.split('=')[1]
+                            # print(self.xsrf_token)
+                        if "ssesyranac" in bstring:
+                            self.session=bstring.split('=')[1]
+                            # print(self.session)
                 access_token = response.json()["access_token"]
                 self.accessToken = access_token
                 #print(access_token)
@@ -77,17 +83,19 @@ class Canary:
         headers["Cookie"]= "ssesyranac=" + self.session
         headers['Authorization'] = 'Bearer ' + self.accessToken
         response = requests.get(self.baseUrl+command, headers=headers)
-        s=response.headers["set-cookie"].split(';')
+        s=response.headers["set-cookie"].split(',')
         for astring in s:
-            if "XSRF-TOKEN" in astring:
-                self.xsrf_token=astring.split('=')[1]
-            if "ssesyranac" in astring:
-                self.session=astring.split('=')[1]
-        #print(self.xsrf_token)
-        #print(self.session)
+            s2=astring.split(';')
+            for bstring in s2:
+                if "XSRF-TOKEN" in bstring:
+                    self.xsrf_token=bstring.split('=')[1]
+                    # print(self.xsrf_token)
+                if "ssesyranac" in bstring:
+                    self.session=bstring.split('=')[1]
+                    # print(self.session)
         return response.json()
     
-    # "method": "GET", "url": "https://my.canary.is/api/readings?deviceId=123456&type=canary"
+    # "method": "GET", "url": "https://my.canary.is/api/readings?deviceId=1174173&type=canary"
     def getMeasurements(self, deviceId=None, devicetype=None):
         command= "readings"
         headers={}
@@ -102,11 +110,15 @@ class Canary:
         #print(payload)
         response = requests.get("https://my.canary.is/api/readings?deviceId=" + deviceId + "&type=" + devicetype, headers=headers)
         # response = requests.get(self.baseUrl+command, headers=headers, data=payload)
-        s=response.headers["set-cookie"].split(';')
+        s=response.headers["set-cookie"].split(',')
         for astring in s:
-            if "XSRF-TOKEN" in astring:
-                self.xsrf_token=astring.split('=')[1]
-            if "ssesyranac" in astring:
-                self.session=astring.split('=')[1]
+            s2=astring.split(';')
+            for bstring in s2:
+                if "XSRF-TOKEN" in bstring:
+                    self.xsrf_token=bstring.split('=')[1]
+                    # print(self.xsrf_token)
+                if "ssesyranac" in bstring:
+                    self.session=bstring.split('=')[1]
+                    # print(self.session)
         return response.json()
         
