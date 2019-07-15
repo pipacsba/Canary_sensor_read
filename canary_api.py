@@ -34,8 +34,7 @@ class Canary:
             headers = {'Accept-Encoding': 'identity'}
             response=requests.get("https://my.canary.is/login", headers=headers)
             response.raise_for_status()
-            #a_resp=json.loads(response.headers)
-            self.UpdateTokenInfo(response.headers["set-cookie"])
+            self.UpdateTokenInfo(response.cookies)
             
             # with header information available log in
             if len(self.session)>10:
@@ -44,10 +43,9 @@ class Canary:
                 headers["Cookie"]= "ssesyranac=" + self.session
                 response = requests.post("https://my.canary.is/api/auth/login", data=payload, headers=headers)
                 response.raise_for_status()
-                self.UpdateTokenInfo(response.headers["set-cookie"])
+                self.UpdateTokenInfo(response.cookies)
                 access_token = response.json()["access_token"]
                 self.accessToken = access_token
-                #print(access_token)
             return "OK"
 
         except requests.exceptions.HTTPError as error:
@@ -64,7 +62,7 @@ class Canary:
         headers["Cookie"]= "ssesyranac=" + self.session
         headers['Authorization'] = 'Bearer ' + self.accessToken
         response = requests.get(self.baseUrl+command, headers=headers)
-        self.UpdateTokenInfo(response.headers["set-cookie"])
+        self.UpdateTokenInfo(response.cookies)
         return response.json()
     
     # "method": "GET", "url": "https://my.canary.is/api/readings?deviceId=1234567&type=canary"
@@ -77,23 +75,14 @@ class Canary:
         payload = {}
         payload["deviceId"] = deviceId
         payload["type"] = devicetype
-        #print(self.xsrf_token)
-        #print(self.session)
-        #print(payload)
         response = requests.get("https://my.canary.is/api/readings?deviceId=" + deviceId + "&type=" + devicetype, headers=headers)
         # response = requests.get(self.baseUrl+command, headers=headers, data=payload)
-        self.UpdateTokenInfo(response.headers["set-cookie"])
+        self.UpdateTokenInfo(response.cookies)
         return response.json()
         
-    def UpdateTokenInfo(self, headerstring=None):
-        if len(headerstring)>1:
-            s=headerstring.split(',')
-            for astring in s:
-                s2=astring.split(';')
-                for bstring in s2:
-                    if "XSRF-TOKEN" in bstring:
-                        self.xsrf_token=bstring.split('=')[1]
-                        # print(self.xsrf_token)
-                    if "ssesyranac" in bstring:
-                        self.session=bstring.split('=')[1]
-                        # print(self.session)
+    def UpdateTokenInfo(self, cookiesjar=None):
+        if len(cookiesjar)>1:
+            self.xsrf_token=cookiesjar['XSRF-TOKEN']
+            # print(self.xsrf_token)
+            self.session=cookiesjar['ssesyranac']
+            # print(self.session)
