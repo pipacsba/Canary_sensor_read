@@ -35,17 +35,7 @@ class Canary:
             response=requests.get("https://my.canary.is/login", headers=headers)
             response.raise_for_status()
             #a_resp=json.loads(response.headers)
-            s=response.headers["set-cookie"].split(',')
-            # print(s)
-            for astring in s:
-                s2=astring.split(';')
-                for bstring in s2:
-                    if "XSRF-TOKEN" in bstring:
-                        self.xsrf_token=bstring.split('=')[1]
-                        # print(self.xsrf_token)
-                    if "ssesyranac" in bstring:
-                        self.session=bstring.split('=')[1]
-                        # print(self.session)
+            self.UpdateTokenInfo(response.headers["set-cookie"])
             
             # with header information available log in
             if len(self.session)>10:
@@ -54,16 +44,7 @@ class Canary:
                 headers["Cookie"]= "ssesyranac=" + self.session
                 response = requests.post("https://my.canary.is/api/auth/login", data=payload, headers=headers)
                 response.raise_for_status()
-                s=response.headers["set-cookie"].split(',')
-                for astring in s:
-                    s2=astring.split(';')
-                    for bstring in s2:
-                        if "XSRF-TOKEN" in bstring:
-                            self.xsrf_token=bstring.split('=')[1]
-                            # print(self.xsrf_token)
-                        if "ssesyranac" in bstring:
-                            self.session=bstring.split('=')[1]
-                            # print(self.session)
+                self.UpdateTokenInfo(response.headers["set-cookie"])
                 access_token = response.json()["access_token"]
                 self.accessToken = access_token
                 #print(access_token)
@@ -83,16 +64,7 @@ class Canary:
         headers["Cookie"]= "ssesyranac=" + self.session
         headers['Authorization'] = 'Bearer ' + self.accessToken
         response = requests.get(self.baseUrl+command, headers=headers)
-        s=response.headers["set-cookie"].split(',')
-        for astring in s:
-            s2=astring.split(';')
-            for bstring in s2:
-                if "XSRF-TOKEN" in bstring:
-                    self.xsrf_token=bstring.split('=')[1]
-                    # print(self.xsrf_token)
-                if "ssesyranac" in bstring:
-                    self.session=bstring.split('=')[1]
-                    # print(self.session)
+        self.UpdateTokenInfo(response.headers["set-cookie"])
         return response.json()
     
     # "method": "GET", "url": "https://my.canary.is/api/readings?deviceId=1234567&type=canary"
@@ -110,15 +82,18 @@ class Canary:
         #print(payload)
         response = requests.get("https://my.canary.is/api/readings?deviceId=" + deviceId + "&type=" + devicetype, headers=headers)
         # response = requests.get(self.baseUrl+command, headers=headers, data=payload)
-        s=response.headers["set-cookie"].split(',')
-        for astring in s:
-            s2=astring.split(';')
-            for bstring in s2:
-                if "XSRF-TOKEN" in bstring:
-                    self.xsrf_token=bstring.split('=')[1]
-                    # print(self.xsrf_token)
-                if "ssesyranac" in bstring:
-                    self.session=bstring.split('=')[1]
-                    # print(self.session)
+        self.UpdateTokenInfo(response.headers["set-cookie"])
         return response.json()
         
+    def UpdateTokenInfo(self, headerstring=None):
+        if len(headerstring)>1:
+            s=headerstring.split(',')
+            for astring in s:
+                s2=astring.split(';')
+                for bstring in s2:
+                    if "XSRF-TOKEN" in bstring:
+                        self.xsrf_token=bstring.split('=')[1]
+                        # print(self.xsrf_token)
+                    if "ssesyranac" in bstring:
+                        self.session=bstring.split('=')[1]
+                        # print(self.session)
