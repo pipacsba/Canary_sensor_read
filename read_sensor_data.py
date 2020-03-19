@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Test Netatmo  class
-#
+
 import canary_api as Canary
 import time, json
 from sys import argv
@@ -10,6 +9,7 @@ from sys import argv
 def main():
     #print("something started")
     canary = Canary.Canary("/home/homeassistant/.homeassistant/scripts/Canary_sensor_read/Canary.conf")
+    # print("Canary object created")
     token_got = canary.getAccessToken()
     
     air_quality = ""
@@ -17,7 +17,7 @@ def main():
     temperature = ""
     read_ok=False
     
-    #print(token_got)
+    # print(token_got)
     if token_got != "NOK":
         location = canary.getLocations()
         # print(location)
