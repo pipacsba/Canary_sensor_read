@@ -17,6 +17,7 @@ class Canary:
         self.loadConfigFile(self.configFileName)
         self.xsrf_token = None
         self.session= None
+        self.sessiontoken = None
 
     def loadConfigFile(self, configFileName):
         #print('read config file')
@@ -35,6 +36,7 @@ class Canary:
             response=requests.get("https://my.canary.is/login", headers=headers)
             response.raise_for_status()
             self.UpdateTokenInfo(response.cookies)
+            # print("First call with the right content")
             
             # with header information available log in
             if len(self.session)>10:
@@ -45,7 +47,9 @@ class Canary:
                 response.raise_for_status()
                 self.UpdateTokenInfo(response.cookies)
                 access_token = response.json()["access_token"]
+                # print(response.json())
                 self.accessToken = access_token
+                # print("access token get")
             return "OK"
 
         except requests.exceptions.HTTPError as error:
@@ -56,6 +60,7 @@ class Canary:
 
     # "method": "GET", "url": "https://my.canary.is/api/locations"
     def getLocations(self):
+        # print("getloaction called")
         command= "locations"
         headers={}
         headers["X-XSRF-TOKEN"]=self.xsrf_token
@@ -67,6 +72,7 @@ class Canary:
     
     # "method": "GET", "url": "https://my.canary.is/api/readings?deviceId=1234567&type=canary"
     def getMeasurements(self, deviceId=None, devicetype=None):
+        # print("getmeasurements called")
         command= "readings"
         headers={}
         headers["X-XSRF-TOKEN"]=self.xsrf_token
@@ -82,7 +88,12 @@ class Canary:
         
     def UpdateTokenInfo(self, cookiesjar=None):
         if len(cookiesjar)>1:
+            # print(cookiesjar)
             self.xsrf_token=cookiesjar['XSRF-TOKEN']
             # print(self.xsrf_token)
-            self.session=cookiesjar['ssesyranac']
-            # print(self.session)
+            if "ssesyranac" in cookiesjar:
+                self.session=cookiesjar['ssesyranac']
+                # print(self.session)
+            if "ssesyranac:token" in cookiesjar:
+                self.sessiontoken=cookiesjar['ssesyranac:token']
+
